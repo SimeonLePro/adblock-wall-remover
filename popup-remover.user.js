@@ -10,8 +10,8 @@
 // @match        *://geotjek.dk/*
 // @match        *://*.geocheck.org/*
 // @match        *://geocheck.org/*
-// @match        *://*.geocachen.dk/*
-// @match        *://geocachen.dk/*
+// @match        *://*.geocachen.be/*
+// @match        *://geocachen.be/*
 // @match        *://*.anker.com/*
 // @match        *://anker.com/*
 // @match        *://*.olln.be/*
