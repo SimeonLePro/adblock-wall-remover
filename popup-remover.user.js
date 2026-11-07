@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.2.1
+// @version      2.3.0
 // @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
-// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com, project-gc.com and olln.be.
+// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com, project-gc.com, olln.be and anker.com.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
 // @match        *://geotjek.dk/*
@@ -12,6 +12,8 @@
 // @match        *://geocheck.org/*
 // @match        *://*.geocachen.dk/*
 // @match        *://geocachen.dk/*
+// @match        *://*.anker.com/*
+// @match        *://anker.com/*
 // @match        *://*.olln.be/*
 // @match        *://olln.be/*
 // @match        *://*.kaldata.com/*
@@ -29,6 +31,11 @@
   const isKaldata = /(^|\.)kaldata\.com$/.test(host);
   const isProjectGC = /(^|\.)project-gc\.com$/.test(host);
   const isOlln = /(^|\.)olln\.be$/.test(host);
+  const isAnker = /(^|\.)anker\.com$/.test(host);
+
+  // anker.com: "Inscrivez-vous" newsletter sign-up modal.
+  // Class names carry a changing hash suffix, so match on the stable prefix.
+  const ANKER_MODAL = '[class*="RegistrationsModel_registrations_model_wrap"], registrations-main';
 
   // olln.be: "Aller vers olln.be" portal link
   const OLLN_PORTAL = '.to-portal';
@@ -55,11 +62,12 @@
   if (isKaldata) hide.push(KALDATA_BANNER);
   if (isProjectGC) hide.push(REWARDED, ADS);
   if (isOlln) hide.push(OLLN_PORTAL);
+  if (isAnker) hide.push(ANKER_MODAL);
   const style = document.createElement('style');
   style.textContent = hide.join(',') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
 
-  // Project-GC: remove empty full-screen fixed layers (dimmed backdrops)
+  // Remove empty full-screen fixed layers (dimmed backdrops)
   function removeDimLayers() {
     document.querySelectorAll('body > div, body > section').forEach(el => {
       const cs = getComputedStyle(el);
@@ -95,6 +103,16 @@
         if (p && p.children.length === 1 && p !== document.body) p.remove();
         else el.remove();
       });
+    }
+
+    // anker.com newsletter modal
+    if (isAnker) {
+      const modal = document.querySelectorAll(ANKER_MODAL);
+      if (modal.length) {
+        modal.forEach(el => el.remove());
+        removeDimLayers();
+        removedPopup = true;
+      }
     }
 
     // olln.be portal link
