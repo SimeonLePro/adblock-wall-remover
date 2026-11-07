@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.3.0
+// @version      2.4.0
 // @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
-// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com, project-gc.com, olln.be and anker.com.
+// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com and visit.brussels.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
 // @match        *://geotjek.dk/*
@@ -12,6 +12,8 @@
 // @match        *://geocheck.org/*
 // @match        *://*.geocachen.be/*
 // @match        *://geocachen.be/*
+// @match        *://*.visit.brussels/*
+// @match        *://visit.brussels/*
 // @match        *://*.anker.com/*
 // @match        *://anker.com/*
 // @match        *://*.olln.be/*
@@ -32,6 +34,10 @@
   const isProjectGC = /(^|\.)project-gc\.com$/.test(host);
   const isOlln = /(^|\.)olln\.be$/.test(host);
   const isAnker = /(^|\.)anker\.com$/.test(host);
+  const isVisitBrussels = /(^|\.)visit\.brussels$/.test(host);
+
+  // visit.brussels: "Bonjour ! ... connaissez-vous déjà Bruxelles ?" dialog
+  const BRUSSELS_DIALOG = 'dialog.cmp-is-local-message, dialog.cmp-dialog-side';
 
   // anker.com: "Inscrivez-vous" newsletter sign-up modal.
   // Class names carry a changing hash suffix, so match on the stable prefix.
@@ -63,6 +69,7 @@
   if (isProjectGC) hide.push(REWARDED, ADS);
   if (isOlln) hide.push(OLLN_PORTAL);
   if (isAnker) hide.push(ANKER_MODAL);
+  if (isVisitBrussels) hide.push(BRUSSELS_DIALOG);
   const style = document.createElement('style');
   style.textContent = hide.join(',') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
@@ -113,6 +120,11 @@
         removeDimLayers();
         removedPopup = true;
       }
+    }
+
+    // visit.brussels "do you know Brussels" dialog
+    if (isVisitBrussels) {
+      document.querySelectorAll(BRUSSELS_DIALOG).forEach(el => el.remove());
     }
 
     // olln.be portal link
