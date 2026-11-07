@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.4.0
+// @version      2.5.0
 // @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
-// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com and visit.brussels.
+// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com, visit.brussels and quefaire.be.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
 // @match        *://geotjek.dk/*
@@ -12,6 +12,8 @@
 // @match        *://geocheck.org/*
 // @match        *://*.geocachen.be/*
 // @match        *://geocachen.be/*
+// @match        *://*.quefaire.be/*
+// @match        *://quefaire.be/*
 // @match        *://*.visit.brussels/*
 // @match        *://visit.brussels/*
 // @match        *://*.anker.com/*
@@ -35,6 +37,10 @@
   const isOlln = /(^|\.)olln\.be$/.test(host);
   const isAnker = /(^|\.)anker\.com$/.test(host);
   const isVisitBrussels = /(^|\.)visit\.brussels$/.test(host);
+  const isQuefaire = /(^|\.)quefaire\.be$/.test(host);
+
+  // quefaire.be: newsletter sign-up modal (Bootstrap modal containing the newsletter form)
+  const QUEFAIRE_FORM = 'form[action*="auto_newsletter.php"]';
 
   // visit.brussels: "Bonjour ! ... connaissez-vous déjà Bruxelles ?" dialog
   const BRUSSELS_DIALOG = 'dialog.cmp-is-local-message, dialog.cmp-dialog-side';
@@ -70,6 +76,7 @@
   if (isOlln) hide.push(OLLN_PORTAL);
   if (isAnker) hide.push(ANKER_MODAL);
   if (isVisitBrussels) hide.push(BRUSSELS_DIALOG);
+  if (isQuefaire) hide.push('.modal:has(' + QUEFAIRE_FORM + ')');
   const style = document.createElement('style');
   style.textContent = hide.join(',') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
@@ -118,6 +125,22 @@
       if (modal.length) {
         modal.forEach(el => el.remove());
         removeDimLayers();
+        removedPopup = true;
+      }
+    }
+
+    // quefaire.be newsletter modal (only modals, never an inline footer form)
+    if (isQuefaire) {
+      let removedModal = false;
+      document.querySelectorAll('.modal-content').forEach(mc => {
+        if (!mc.querySelector(QUEFAIRE_FORM)) return;
+        (mc.closest('.modal') || mc).remove();
+        removedModal = true;
+      });
+      if (removedModal) {
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
         removedPopup = true;
       }
     }
