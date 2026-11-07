@@ -14,7 +14,8 @@ A collection of userscripts that remove adblock walls, banners and ads from many
 | olln.be | "Aller vers olln.be" portal link |
 | anker.com | Newsletter sign-up pop-up |
 | visit.brussels | "Do you know Brussels?" dialog |
-| quefaire.be | Newsletter sign-up pop-up |
+| quefaire.be | Newsletter pop-up and box, share buttons, Google follow button |
+| wattedoen.be | Newsletter pop-up and box, share buttons, Google follow button |
 
 *This list grows over time. See each script's header for the exact sites it matches.*
 
