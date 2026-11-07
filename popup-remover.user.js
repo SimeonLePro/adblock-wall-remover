@@ -1,11 +1,15 @@
 // ==UserScript==
-// @name         Project-GC - remove pop-ups and ads
+// @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      1.3.0
-// @description  Removes the "Unlock more content" rewarded-ad pop-up, the "Please allow ads" adblock wall (with its dimmed background) and the sticky bottom anchor ad on project-gc.com.
+// @version      1.0.0
+// @description  Removes the Google Funding Choices adblock wall on geotjek.dk, geocheck.org and kaldata.com, plus the extension smart banner on kaldata.com.
 // @license      MIT
-// @match        *://*.project-gc.com/*
-// @match        *://project-gc.com/*
+// @match        *://*.geotjek.dk/*
+// @match        *://geotjek.dk/*
+// @match        *://*.geocheck.org/*
+// @match        *://geocheck.org/*
+// @match        *://*.kaldata.com/*
+// @match        *://kaldata.com/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
@@ -13,57 +17,37 @@
 (function () {
   'use strict';
 
-  const REWARDED = '.auto-rewarded-dialog, [class*="auto-rewarded-"]';
   const WALL = '.fc-ab-root, .fc-ab-dialog, .fc-dialog-overlay';
-  const ADS = [
-    'ins.adsbygoogle',
-    'ins[data-anchor-status]',
-    'ins[data-ad-status]',
-    'iframe[id^="aswift_"]',
-    'iframe[src*="googleads.g.doubleclick.net"]',
-    '.grippy-host',
-  ].join(',');
+  const isKaldata = /(^|\.)kaldata\.com$/.test(location.hostname);
 
-  // Hide immediately so nothing flashes on screen
+  // Hide the wall immediately so it never flashes on screen
   const style = document.createElement('style');
-  style.textContent = [REWARDED, WALL, ADS].join(',') + ' { display: none !important; }';
+  style.textContent = WALL + (isKaldata ? ', #banner-ui' : '') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
 
-  // Remove empty full-screen fixed layers (dimmed backdrops)
-  function removeDimLayers() {
-    document.querySelectorAll('body > div, body > section').forEach(el => {
-      const cs = getComputedStyle(el);
-      if (cs.position !== 'fixed') return;
-      const r = el.getBoundingClientRect();
-      const coversScreen = r.width >= innerWidth * 0.9 && r.height >= innerHeight * 0.9;
-      const empty = el.textContent.trim() === '' && !el.querySelector('img, video, iframe, input, button, a');
-      if (coversScreen && empty) el.remove();
-    });
-  }
-
   function clean() {
-    const rewarded = document.querySelectorAll(REWARDED);
+    // Adblock wall (Google Funding Choices)
     const wall = document.querySelectorAll(WALL);
-    const ads = document.querySelectorAll(ADS);
-
-    // Use the rewarded dialog's own close button first
-    if (rewarded.length) {
-      document.querySelectorAll('.auto-rewarded-close-button').forEach(b => b.click());
-    }
-
-    rewarded.forEach(el => el.remove());
     wall.forEach(el => el.remove());
-    ads.forEach(el => el.remove());
 
-    // Restore scrolling only if a pop-up or wall was removed
-    if (rewarded.length || wall.length) {
-      removeDimLayers();
+    // Restore scrolling only if the wall was actually removed
+    if (wall.length) {
       for (const t of [document.documentElement, document.body]) {
         if (t) {
           t.style.setProperty('overflow', 'auto', 'important');
           t.style.setProperty('position', 'static', 'important');
         }
       }
+    }
+
+    // Kaldata extension smart banner
+    if (isKaldata) {
+      document.querySelectorAll('#banner-ui').forEach(el => {
+        // Remove the wrapper too if it only contains the banner
+        const p = el.parentElement;
+        if (p && p.children.length === 1 && p !== document.body) p.remove();
+        else el.remove();
+      });
     }
   }
 
