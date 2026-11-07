@@ -8,8 +8,8 @@
 // @match        *://geotjek.dk/*
 // @match        *://*.geocheck.org/*
 // @match        *://geocheck.org/*
-// @match        *://*.geocachen.dk/*
-// @match        *://geocachen.dk/*
+// @match        *://*.geocachen.be/*
+// @match        *://geocachen.be/*
 // @match        *://*.kaldata.com/*
 // @match        *://kaldata.com/*
 // @match        *://*.project-gc.com/*
