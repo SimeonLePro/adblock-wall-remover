@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.2.0
+// @version      2.2.1
+// @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
+// @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com, project-gc.com and olln.be.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
