@@ -11,6 +11,7 @@ A collection of userscripts that remove adblock walls, banners and ads from many
 | kaldata.com | Adblock wall, extension banner |
 | project-gc.com | "Unlock more content" pop-up, adblock wall, sticky bottom ad |
 | geocachen.be | Adblock wall |
+| olln.be | "Aller vers olln.be" portal link |
 
 *This list grows over time. See each script's header for the exact sites it matches.*
 
