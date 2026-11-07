@@ -1,15 +1,17 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.1.0
-// @description  Removes adblock walls, pop-ups and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com and project-gc.com.
+// @version      2.2.0
+// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.dk, kaldata.com, project-gc.com and olln.be.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
 // @match        *://geotjek.dk/*
 // @match        *://*.geocheck.org/*
 // @match        *://geocheck.org/*
-// @match        *://*.geocachen.be/*
-// @match        *://geocachen.be/*
+// @match        *://*.geocachen.dk/*
+// @match        *://geocachen.dk/*
+// @match        *://*.olln.be/*
+// @match        *://olln.be/*
 // @match        *://*.kaldata.com/*
 // @match        *://kaldata.com/*
 // @match        *://*.project-gc.com/*
@@ -24,6 +26,10 @@
   const host = location.hostname;
   const isKaldata = /(^|\.)kaldata\.com$/.test(host);
   const isProjectGC = /(^|\.)project-gc\.com$/.test(host);
+  const isOlln = /(^|\.)olln\.be$/.test(host);
+
+  // olln.be: "Aller vers olln.be" portal link
+  const OLLN_PORTAL = '.to-portal';
 
   // Adblock wall (Google Funding Choices) - used on all supported sites
   const WALL = '.fc-ab-root, .fc-ab-dialog, .fc-dialog-overlay';
@@ -46,6 +52,7 @@
   const hide = [WALL];
   if (isKaldata) hide.push(KALDATA_BANNER);
   if (isProjectGC) hide.push(REWARDED, ADS);
+  if (isOlln) hide.push(OLLN_PORTAL);
   const style = document.createElement('style');
   style.textContent = hide.join(',') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
@@ -86,6 +93,11 @@
         if (p && p.children.length === 1 && p !== document.body) p.remove();
         else el.remove();
       });
+    }
+
+    // olln.be portal link
+    if (isOlln) {
+      document.querySelectorAll(OLLN_PORTAL).forEach(el => el.remove());
     }
 
     // Project-GC pop-up and ads
