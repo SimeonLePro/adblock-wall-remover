@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.5.0
+// @version      2.6.0
 // @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
-// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com, visit.brussels and quefaire.be.
+// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com, visit.brussels, quefaire.be and wattedoen.be.
 // @license      MIT
 // @match        *://*.geotjek.dk/*
 // @match        *://geotjek.dk/*
@@ -12,6 +12,8 @@
 // @match        *://geocheck.org/*
 // @match        *://*.geocachen.be/*
 // @match        *://geocachen.be/*
+// @match        *://*.wattedoen.be/*
+// @match        *://wattedoen.be/*
 // @match        *://*.quefaire.be/*
 // @match        *://quefaire.be/*
 // @match        *://*.visit.brussels/*
@@ -37,10 +39,13 @@
   const isOlln = /(^|\.)olln\.be$/.test(host);
   const isAnker = /(^|\.)anker\.com$/.test(host);
   const isVisitBrussels = /(^|\.)visit\.brussels$/.test(host);
-  const isQuefaire = /(^|\.)quefaire\.be$/.test(host);
+  // quefaire.be and wattedoen.be are the French and Dutch versions of the same site
+  const isQuefaire = /(^|\.)(quefaire|wattedoen)\.be$/.test(host);
 
-  // quefaire.be: newsletter sign-up modal (Bootstrap modal containing the newsletter form)
+  // Newsletter form used by the sign-up modal and the sidebar "Nieuwsbrief" box
   const QUEFAIRE_FORM = 'form[action*="auto_newsletter.php"]';
+  // Share buttons row and the "follow us on Google" button
+  const QUEFAIRE_EXTRA = '#sharebox, a[href*="google.com/preferences/source"]';
 
   // visit.brussels: "Bonjour ! ... connaissez-vous déjà Bruxelles ?" dialog
   const BRUSSELS_DIALOG = 'dialog.cmp-is-local-message, dialog.cmp-dialog-side';
@@ -76,7 +81,9 @@
   if (isOlln) hide.push(OLLN_PORTAL);
   if (isAnker) hide.push(ANKER_MODAL);
   if (isVisitBrussels) hide.push(BRUSSELS_DIALOG);
-  if (isQuefaire) hide.push('.modal:has(' + QUEFAIRE_FORM + ')');
+  if (isQuefaire) {
+    hide.push('.modal:has(' + QUEFAIRE_FORM + ')', '.box-res:has(' + QUEFAIRE_FORM + ')', QUEFAIRE_EXTRA);
+  }
   const style = document.createElement('style');
   style.textContent = hide.join(',') + ' { display: none !important; }';
   (document.head || document.documentElement).appendChild(style);
@@ -129,7 +136,15 @@
       }
     }
 
-    // quefaire.be newsletter modal (only modals, never an inline footer form)
+    // quefaire.be / wattedoen.be: sidebar newsletter box, share row, Google follow button
+    if (isQuefaire) {
+      document.querySelectorAll('.box-res').forEach(box => {
+        if (box.querySelector(QUEFAIRE_FORM)) box.remove();
+      });
+      document.querySelectorAll(QUEFAIRE_EXTRA).forEach(el => el.remove());
+    }
+
+    // quefaire.be / wattedoen.be newsletter modal (only inside a modal)
     if (isQuefaire) {
       let removedModal = false;
       document.querySelectorAll('.modal-content').forEach(mc => {
