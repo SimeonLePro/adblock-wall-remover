@@ -1,17 +1,13 @@
 // ==UserScript==
 // @name         Annoying Pop-up Remover
 // @namespace    https://greasyfork.org/users/1658285
-// @version      2.6.0
+// @version      3.0.0
 // @updateURL    https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
 // @downloadURL  https://raw.githubusercontent.com/SimeonLePro/adblock-wall-remover/main/popup-remover.user.js
-// @description  Removes adblock walls, pop-ups, banners and ads on geotjek.dk, geocheck.org, geocachen.be, kaldata.com, project-gc.com, olln.be, anker.com, visit.brussels, quefaire.be and wattedoen.be.
+// @description  Removes newsletter pop-ups, banners and other annoyances on kaldata.com, project-gc.com, olln.be, anker.com, visit.brussels, quefaire.be, wattedoen.be and techradar.com. Does not touch adblock walls (use uBlock Origin for those).
 // @license      MIT
-// @match        *://*.geotjek.dk/*
-// @match        *://geotjek.dk/*
-// @match        *://*.geocheck.org/*
-// @match        *://geocheck.org/*
-// @match        *://*.geocachen.be/*
-// @match        *://geocachen.be/*
+// @match        *://*.techradar.com/*
+// @match        *://techradar.com/*
 // @match        *://*.wattedoen.be/*
 // @match        *://wattedoen.be/*
 // @match        *://*.quefaire.be/*
@@ -39,6 +35,11 @@
   const isOlln = /(^|\.)olln\.be$/.test(host);
   const isAnker = /(^|\.)anker\.com$/.test(host);
   const isVisitBrussels = /(^|\.)visit\.brussels$/.test(host);
+  const isTechradar = /(^|\.)techradar\.com$/.test(host);
+
+  // techradar.com: Future plc newsletter box in the article and its exit-intent pop-up.
+  // Hidden with CSS only: the component is rendered by React, so deleting its nodes could cause errors.
+  const TECHRADAR_NEWSLETTER = '#newsletter-slice, .widget-newsletter-slice, .newsletter-form__wrapper, .exit-intent__background';
   // quefaire.be and wattedoen.be are the French and Dutch versions of the same site
   const isQuefaire = /(^|\.)(quefaire|wattedoen)\.be$/.test(host);
 
@@ -57,13 +58,10 @@
   // olln.be: "Aller vers olln.be" portal link
   const OLLN_PORTAL = '.to-portal';
 
-  // Adblock wall (Google Funding Choices) - used on all supported sites
-  const WALL = '.fc-ab-root, .fc-ab-dialog, .fc-dialog-overlay';
-
   // Kaldata: extension smart banner
   const KALDATA_BANNER = '#banner-ui';
 
-  // Project-GC: "Unlock more content" pop-up and Google ads
+  // Project-GC: "Unlock more content" pop-up and sticky Google anchor ad
   const REWARDED = '.auto-rewarded-dialog, [class*="auto-rewarded-"]';
   const ADS = [
     'ins.adsbygoogle',
@@ -75,12 +73,13 @@
   ].join(',');
 
   // Hide everything immediately so nothing flashes on screen
-  const hide = [WALL];
+  const hide = [];
   if (isKaldata) hide.push(KALDATA_BANNER);
   if (isProjectGC) hide.push(REWARDED, ADS);
   if (isOlln) hide.push(OLLN_PORTAL);
   if (isAnker) hide.push(ANKER_MODAL);
   if (isVisitBrussels) hide.push(BRUSSELS_DIALOG);
+  if (isTechradar) hide.push(TECHRADAR_NEWSLETTER);
   if (isQuefaire) {
     hide.push('.modal:has(' + QUEFAIRE_FORM + ')', '.box-res:has(' + QUEFAIRE_FORM + ')', QUEFAIRE_EXTRA);
   }
@@ -111,10 +110,6 @@
 
   function clean() {
     let removedPopup = false;
-
-    // Adblock wall
-    const wall = document.querySelectorAll(WALL);
-    if (wall.length) { wall.forEach(el => el.remove()); removedPopup = true; }
 
     // Kaldata extension banner
     if (isKaldata) {
@@ -183,7 +178,7 @@
       if (removedPopup) removeDimLayers();
     }
 
-    // Restore scrolling only if a pop-up or wall was actually removed
+    // Restore scrolling only if a pop-up was actually removed
     if (removedPopup) unlockScroll();
   }
 
